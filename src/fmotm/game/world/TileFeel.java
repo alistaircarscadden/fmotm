@@ -1,8 +1,11 @@
 package fmotm.game.world;
 
-import java.util.HashMap;
-import java.util.Map;
 import static java.lang.Math.pow;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
@@ -11,22 +14,31 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 
 public class TileFeel {
-	private Map<Long, Image> parts = new HashMap<Long, Image>();
+	public Map<Long, Image> parts;
+	public Map<Long, Image> tiles;
+	
 	long largestKey;
-	private Map<Long, Image> tiles = new HashMap<Long, Image>();
-
-	private float scale;
+	private float tileScale;
+	private final int tilePixelSize = 8;
+	private int numTiles;
 	
 	/* Constructor initializes the parts used to create tile images. Tiles
 	 * must be individually added externally by calling the initTile function
 	 * with the ID of the tile you would like to initialize. On world load
 	 * every tile should be loaded.
 	 */
-	public TileFeel(String ref, float scale) {
-		this.scale = scale;
+	public TileFeel(String ref, float tileScale) {
+		this.parts = new HashMap<Long, Image>();
+		this.tiles = new HashMap<Long, Image>();
+		this.tileScale = tileScale;
+		this.numTiles = 0;
 		
 		try {
-			SpriteSheet sprites = new SpriteSheet(ref, 8, 8);
+			Image blank = new Image(tilePixelSize, tilePixelSize);
+			blank.setAlpha(0);
+			tiles.put(0L, blank);
+			
+			SpriteSheet sprites = new SpriteSheet(ref, tilePixelSize, tilePixelSize);
 			int x = sprites.getHorizontalCount();
 			int y = sprites.getVerticalCount();
 			int numSprites = x * y;
@@ -47,28 +59,33 @@ public class TileFeel {
 	 * find the parts largest to smallest then reverse the order to add them.
 	 */
 	public void initTile(long id) {
-		Map<Long, Image> includedParts = new HashMap<Long, Image>();
+		if(tiles.get(id) != null) return;
+
+		List<Image> includedParts = new ArrayList<Image>();
 		long id_cpy = id;
 
-			for(long g = largestKey; g > 0; g /= 2) {
-				if(id_cpy - g >= 0) {
-					id_cpy -= g;
-					includedParts.put(g, parts.get(g));
-				}
+		for(long g = largestKey; g > 0; g /= 2) {
+			if(id_cpy - g >= 0) {
+				id_cpy -= g;
+				includedParts.add(parts.get(g));
 			}
+		}
 
-			ImageBuffer finalImgBuf = new ImageBuffer(8, 8);
-			for(long k : parts.keySet()) {
-				addImageToBuffer(finalImgBuf, parts.get(k));
-			}
-			
-			tiles.put(id, finalImgBuf.getImage().getScaledCopy(scale));
+		ImageBuffer finalImgBuf = new ImageBuffer(8, 8);
+		
+		for(int i = includedParts.size() - 1; i >= 0; i--)
+			addImageToBuffer(finalImgBuf, includedParts.get(i));
+		
+		Image finalImage = finalImgBuf.getImage();
+		finalImage.setFilter(Image.FILTER_NEAREST);
+		finalImage = finalImage.getScaledCopy(tileScale / tilePixelSize);
+		tiles.put(id, finalImage);
+		System.out.printf("%d inits.\n", ++numTiles);
 	}
 	
 	/* Given an ImageBuffer to and an Image from it adds the pixels from from to to.
-	 * Pixels with Color = (254, 1, 0) will be erased from the buffer (eraser pixels)
+	 * Pixels with Color = (45, 52, 41) (ERA in HEX) will be erased from the buffer (eraser pixels)
 	 */
-	// TODO the eraser pixels
 	public void addImageToBuffer(ImageBuffer to, Image from) {
 		for(int x = 0; x < from.getWidth(); x++) {
 			for(int y = 0; y < from.getHeight(); y++) {
@@ -79,5 +96,13 @@ public class TileFeel {
 				}
 			}
 		}
+	}
+	
+	public Image getTile(long id) {
+		if(!tiles.containsKey(id)) {
+			return tiles.get(0L);
+		}
+		
+		return tiles.get(id);
 	}
 }

@@ -1,56 +1,57 @@
-package fmotm.game.world;
+package fmotm.states;
 
 import java.util.Random;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.geom.Vector2f;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
-import fmotm.game.entity.Player;
+import fmotm.game.world.TileFeel;
 
-public class World {
+public class TileFeelTest extends BasicGameState {
+	
+	private int stateID;
 	public char tiles[][];
 	public long tileStyles[][];
-	public TileFeel tileFeel;
-	public Player player;
-	// Camera refers to position of display within world coordinates
-	public Vector2f camera;
 	
-	// World Properties
-	public final float tileScale = 64f;
-	
-	public World() {
-		player = new Player(new Vector2f(0f, 0f), tileScale);
-		camera = new Vector2f();
+	TileFeel tf;
+
+	public TileFeelTest(int ID) {
+		super();
+		this.stateID = ID;
+		tf = new TileFeel("res/lf_nexus.png", 32f);
+		generateRandom(30, 30);
+		initTileStyles();
 	}
-	
-	public void setTileFeel(String ref) {
-		tileFeel = new TileFeel(ref, tileScale);
+
+	// init-method for initializing all resources
+	@Override
+	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 	}
-	
-	public void drawWorld(GameContainer gc, StateBasedGame sbg, Graphics g) {
-		camera.x = player.position.x - (gc.getWidth() / 2) / tileScale;
-		camera.y = player.position.y - (gc.getHeight() / 2) / tileScale;
-		
-		drawTiles();
-		
-		player.render(camera);
-		
-	}
-	
-	public void drawTile(Vector2f camera, Image img, int x, int y) {
-		img.draw((x - camera.x) * tileScale, (y - camera.y) * tileScale);
-	}
-	
-	public void drawTiles() {
-		// Initial loop draws base for all tiles
-		for(int x = 0; x < tileStyles.length; x++) {
-			for(int y = 0; y < tileStyles[0].length; y++) {
-				drawTile(camera, tileFeel.getTile(tileStyles[x][y]), x, y);
-			}
+
+	// render-method for all the things happening on-screen
+	@Override
+	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+		int numDrawn = 0;
+		for(long id : tf.tiles.keySet()) {
+			Image img = tf.tiles.get(id);
+			img.draw(numDrawn % 10 * 80, numDrawn++ / 10 * 64);
+			g.drawString("" + id, numDrawn % 10 * 80 - 40, numDrawn++ / 10 * 64);
 		}
+	}
+
+	// update-method with all the magic happening in it
+	@Override
+	public void update(GameContainer gc, StateBasedGame sbg, int arg2) throws SlickException {
+	}
+
+	// Returning 'ID' from class 'MainMenu'
+	@Override
+	public int getID() {
+		return stateID;
 	}
 	
 	public void generateRandom(int X, int Y) {
@@ -76,12 +77,10 @@ public class World {
 		
 		tiles[0][0] = ' ';
 	}
+
 	
 	@SuppressWarnings("unused")
 	public void initTileStyles() {
-		Random random = new Random(System.currentTimeMillis());
-		float r;
-		
 		final long floorVA = 1L;
 		final long floorVB = 2L;
 		final long floorVC = 4L;
@@ -128,49 +127,36 @@ public class World {
 		for(int y = 0; y < tiles[0].length; y++) {
 			for(int x = 0; x < tiles.length; x++) {
 				tileStyles[x][y] = 0;
-				
 				if(getTile(x, y) == 'F') {
 					boolean topedg = false;
 					boolean rigedg = false;
 					boolean botedg = false;
 					boolean lefedg = false;
 					
-					r = random.nextFloat();
-					if (r > 0.75) tileStyles[x][y] += floorVA;
-					else if (r > 0.5) tileStyles[x][y] += floorVB;
-					else if (r > 0.25) tileStyles[x][y] += floorVC;
-					else tileStyles[x][y] += floorVD;
+					tileStyles[x][y] += floorVA;
 					
 					// top edge?
 					if(getTile(x, y - 1) == ' ') {
 						topedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += floorETVA;
-						else tileStyles[x][y] += floorETVB;
+						tileStyles[x][y] += floorETVA;
 					}
 					
 					// right edge?
 					if(getTile(x + 1, y) == ' ') {
 						rigedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += floorERVA;
-						else tileStyles[x][y] += floorERVB;
+						tileStyles[x][y] += floorERVA;
 					}
 					
 					// bottom edge?
 					if(getTile(x, y + 1) == ' ') {
 						botedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += floorEBVA;
-						else tileStyles[x][y] += floorEBVB;
+						tileStyles[x][y] += floorEBVA;
 					}
 					
 					// left edge?
 					if(getTile(x - 1, y) == ' ') {
 						lefedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += floorELVA;
-						else tileStyles[x][y] += floorELVB;
+						tileStyles[x][y] += floorELVA;
 					}
 					
 					// top right corner
@@ -199,73 +185,61 @@ public class World {
 					boolean botedg = false;
 					boolean lefedg = false;
 					
-					r = random.nextFloat();
-					if (r > 0.75) tileStyles[x][y] += wallVA;
-					else if (r > 0.5) tileStyles[x][y] += wallVB;
-					else if (r > 0.25) tileStyles[x][y] += wallVC;
-					else tileStyles[x][y] += wallVD;
+					tileStyles[x][y] += wallVA;
 					
 					// top edge?
-					if(getTile(x, y - 1) != 'W') {
+					if(getTile(x, y - 1) == ' ') {
 						topedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += wallETVA;
-						else tileStyles[x][y] += wallETVB;
+						tileStyles[x][y] += wallETVA;
 					}
 					
 					// right edge?
-					if(getTile(x + 1, y) != 'W') {
+					if(getTile(x + 1, y) == ' ') {
 						rigedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += wallERVA;
-						else tileStyles[x][y] += wallERVB;
+						tileStyles[x][y] += wallERVA;
 					}
 					
 					// bottom edge?
-					if(getTile(x, y + 1) != 'W') {
+					if(getTile(x, y + 1) == ' ') {
 						botedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += wallEBVA;
-						else tileStyles[x][y] += wallEBVB;
+						tileStyles[x][y] += wallEBVA;
 					}
 					
 					// left edge?
-					if(getTile(x - 1, y) != 'W') {
+					if(getTile(x - 1, y) == ' ') {
 						lefedg = true;
-						r = random.nextFloat();
-						if (r > 0.5) tileStyles[x][y] += wallELVA;
-						else tileStyles[x][y] += wallELVB;
+						tileStyles[x][y] += wallELVA;
 					}
 					
 					// top right corner
-					if(getTile(x + 1, y - 1) != 'W' && !(topedg || rigedg)) {
+					if(getTile(x + 1, y - 1) == ' ' && !(topedg || rigedg)) {
 						tileStyles[x][y] += wallCTR;
 					}
 					
 					// bottom right corner
-					if(getTile(x + 1, y + 1) != 'W' && !(rigedg || botedg)) {
+					if(getTile(x + 1, y + 1) == ' ' && !(rigedg || botedg)) {
 						tileStyles[x][y] += wallCBR;
 					}
 					
 					// bottom left corner
-					if(getTile(x - 1, y + 1) != 'W' && !(botedg || lefedg)) {
+					if(getTile(x - 1, y + 1) == ' ' && !(botedg || lefedg)) {
 						tileStyles[x][y] += wallCBL;
 					}
 					
 					// top left corner
-					if(getTile(x - 1, y - 1) != 'W' && !(lefedg || topedg)) {
+					if(getTile(x - 1, y - 1) == ' ' && !(lefedg || topedg)) {
 						tileStyles[x][y] += wallCTL;
 					}
 				}
 				if(getTile(x, y) == ' ' && getTile(x, y - 1) != ' ') {
-					r = random.nextFloat();
-					if (r > 0.75) tileStyles[x][y] += dropVA;
-					else if (r > 0.5) tileStyles[x][y] += dropVB;
-					else if (r > 0.25) tileStyles[x][y] += dropVC;
-					else tileStyles[x][y] += dropVD;
+					tileStyles[x][y] += dropVA;
 				}
-				
-				tileFeel.initTile(tileStyles[x][y]);
+			}
+		}
+		
+		for(int y = 0; y < tiles[0].length; y++) {
+			for(int x = 0; x < tiles.length; x++) {
+				tf.initTile(tileStyles[x][y]);
 			}
 		}
 	}

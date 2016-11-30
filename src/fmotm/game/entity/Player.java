@@ -8,29 +8,32 @@ import org.newdawn.slick.geom.Vector2f;
 public class Player extends Entity {
 	public Animation walkDown;
 	public Animation walkUp;
-	public int speed;
+	public float speed;
 	public boolean facingRight, facingDown;
+	private float tileScale;
 	
-	public Player(Vector2f position, float displayScale) {
+	public Player(Vector2f position, float tileScale) {
 		super(position);
 		
 		this.velocity = new Vector2f(64, 0);
-		this.speed = 180;
+		this.speed = 2;
 		this.walkDown = new Animation(false);
 		this.walkUp = new Animation(false);
-		displayScale /= 2;
+		this.tileScale = tileScale;
 		
 		try {
 			SpriteSheet ss = new SpriteSheet("res/player_walk.png", 16, 16);
 			final int frameLength = 100;
 
-			walkDown.addFrame(ss.getSprite(0, 0).getScaledCopy(displayScale), frameLength);
-			walkDown.addFrame(ss.getSprite(1, 0).getScaledCopy(displayScale), frameLength);
-			walkDown.addFrame(ss.getSprite(2, 0).getScaledCopy(displayScale), frameLength);
+			float playerScale = tileScale / (ss.getWidth() / ss.getHorizontalCount());
 			
-			walkUp.addFrame(ss.getSprite(0, 1).getScaledCopy(displayScale), frameLength);
-			walkUp.addFrame(ss.getSprite(1, 1).getScaledCopy(displayScale), frameLength);
-			walkUp.addFrame(ss.getSprite(2, 1).getScaledCopy(displayScale), frameLength);
+			walkDown.addFrame(ss.getSprite(0, 0).getScaledCopy(playerScale), frameLength);
+			walkDown.addFrame(ss.getSprite(1, 0).getScaledCopy(playerScale), frameLength);
+			walkDown.addFrame(ss.getSprite(2, 0).getScaledCopy(playerScale), frameLength);
+			
+			walkUp.addFrame(ss.getSprite(0, 1).getScaledCopy(playerScale), frameLength);
+			walkUp.addFrame(ss.getSprite(1, 1).getScaledCopy(playerScale), frameLength);
+			walkUp.addFrame(ss.getSprite(2, 1).getScaledCopy(playerScale), frameLength);
 		} catch (SlickException e) {
 			e.printStackTrace();
 		}
@@ -63,14 +66,14 @@ public class Player extends Entity {
 	public void render(Vector2f camera) {
 		if(facingDown) {
 			if(facingRight)
-				walkDown.draw(position.x - camera.x, position.y - camera.y);
+				walkDown.draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
 			else
-				walkDown.getCurrentFrame().getFlippedCopy(true, false).draw(position.x - camera.x, position.y - camera.y);
+				walkDown.getCurrentFrame().getFlippedCopy(true, false).draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
 		} else {
 			if(facingRight)
-				walkUp.draw(position.x - camera.x, position.y - camera.y);
+				walkUp.draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
 			else
-				walkUp.getCurrentFrame().getFlippedCopy(true, false).draw(position.x - camera.x, position.y - camera.y);
+				walkUp.getCurrentFrame().getFlippedCopy(true, false).draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
 		}
 	}
 

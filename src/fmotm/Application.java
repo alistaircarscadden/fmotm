@@ -7,6 +7,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import fmotm.states.Game;
 import fmotm.states.MainMenu;
+import fmotm.states.TileFeelTest;
 
 public class Application extends StateBasedGame {
 
@@ -14,6 +15,7 @@ public class Application extends StateBasedGame {
 	public static final int SPLASH       = 0;
     public static final int MAINMENU     = 1;
     public static final int GAME         = 2;
+    public static final int TILEFEELTEST = 3;
 
     // Application Properties
     public static final int WIDTH   = 1024;
@@ -28,6 +30,7 @@ public class Application extends StateBasedGame {
     	//this.addState(new Splash(SPLASH));
     	this.addState(new MainMenu(MAINMENU));
     	this.addState(new Game(GAME));
+    	//this.addState(new TileFeelTest(TILEFEELTEST));
     }
 
     public static void main(String[] args) {

@@ -6,7 +6,6 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -24,8 +23,9 @@ public class Game extends BasicGameState {
 		this.stateID = ID;
 		keys = new BitSet(256);
 		world = new World();
-		world.generateRandom(6, 6);
+		world.generateRandom(40, 10);
 		world.setTileFeel("res/lf_desert.png");
+		world.initTileStyles();
 	}
 
 	// init-method for initializing all resources
