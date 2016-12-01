@@ -23,7 +23,7 @@ public class Game extends BasicGameState {
 		this.stateID = ID;
 		keys = new BitSet(256);
 		world = new World();
-		world.generateRandom(1000, 1000);
+		world.generateRandom(300, 1000);
 		world.setTileFeel("res/lf/lf_desert.png");
 	}
 
@@ -50,8 +50,13 @@ public class Game extends BasicGameState {
 		if(keys.get(Input.KEY_D)) x += 1;
 
 		if(x != 0 && y != 0) {
-			x /= 1.414;
-			y /= 1.414;
+			x *= 0.707;
+			y *= 0.707;
+		}
+		
+		if(keys.get(Input.KEY_LSHIFT)) {
+			x *= 0.3;
+			y *= 0.3;
 		}
 
 		world.player.velocity.x = x * world.player.speed;

@@ -18,7 +18,7 @@ public class Player extends Entity {
 		super(position);
 		
 		this.velocity = new Vector2f(64, 0);
-		this.speed = 3;
+		this.speed = 5;
 		this.walkDown = new Animation(false);
 		this.walkUp = new Animation(false);
 		this.tileScale = tileScale;
