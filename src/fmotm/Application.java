@@ -7,7 +7,6 @@ import org.newdawn.slick.state.StateBasedGame;
 
 import fmotm.states.Game;
 import fmotm.states.MainMenu;
-import fmotm.states.TileFeelTest;
 
 public class Application extends StateBasedGame {
 
@@ -15,12 +14,11 @@ public class Application extends StateBasedGame {
 	public static final int SPLASH       = 0;
     public static final int MAINMENU     = 1;
     public static final int GAME         = 2;
-    public static final int TILEFEELTEST = 3;
 
     // Application Properties
     public static final int WIDTH   = 1024;
     public static final int HEIGHT  = 768;
-    public static final int FPS     = 60;
+    public static final int FPS     = 120;
 
     public Application(String appName) {
         super(appName);
@@ -30,7 +28,6 @@ public class Application extends StateBasedGame {
     	//this.addState(new Splash(SPLASH));
     	this.addState(new MainMenu(MAINMENU));
     	this.addState(new Game(GAME));
-    	//this.addState(new TileFeelTest(TILEFEELTEST));
     }
 
     public static void main(String[] args) {
@@ -38,7 +35,7 @@ public class Application extends StateBasedGame {
             AppGameContainer app = new AppGameContainer(new Application("First Man On The Marble"));
             app.setDisplayMode(WIDTH, HEIGHT, false);
             app.setTargetFrameRate(FPS);
-            app.setShowFPS(false);
+            app.setShowFPS(true);
             app.start();
         } catch(SlickException e) {
             e.printStackTrace();

@@ -23,9 +23,8 @@ public class Game extends BasicGameState {
 		this.stateID = ID;
 		keys = new BitSet(256);
 		world = new World();
-		world.generateRandom(40, 10);
-		world.setTileFeel("res/lf_desert.png");
-		world.initTileStyles();
+		world.generateRandom(1000, 1000);
+		world.setTileFeel("res/lf/lf_desert.png");
 	}
 
 	// init-method for initializing all resources

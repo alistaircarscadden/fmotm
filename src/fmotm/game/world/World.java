@@ -5,6 +5,7 @@ import java.util.Random;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -21,13 +22,14 @@ public class World {
 	public final float tileScale = 64f;
 	
 	public World() {
-		player = new Player(new Vector2f(0f, 0f), tileScale);
+		player = new Player(new Rectangle(0f, 0f, 0.5f, 0.5f), tileScale);
 		camera = new Vector2f();
 	}
 	
 	public void setTileFeel(String ref) {
 		tileFeel = new TileFeel(ref, tileScale);
 		tileStyles = tileFeel.generateTileStyles(tiles);
+		System.out.printf("TileFeel (%s) inits: %d\n", ref, tileFeel.numInits);
 	}
 	
 	public void drawWorld(GameContainer gc, StateBasedGame sbg, Graphics g) {
@@ -63,13 +65,15 @@ public class World {
 			for(int x = 0; x < X; x++) {
 				float f = random.nextFloat();
 				
-				if(f > 0.8) {
+				if(f > 0.9) {
 					tiles[x][y] = ' ';
-				} else if(f > 0.5) {
+				} else if(f > 0.75) {
 					tiles[x][y] = 'W';
 				} else {
 					tiles[x][y] = 'F';
 				}
+				
+				if(y == Y - 1) tiles[x][y] = ' ';
 			}
 		}
 	}

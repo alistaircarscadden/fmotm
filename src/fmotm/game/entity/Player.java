@@ -1,8 +1,10 @@
 package fmotm.game.entity;
 
 import org.newdawn.slick.Animation;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 
 public class Player extends Entity {
@@ -12,14 +14,16 @@ public class Player extends Entity {
 	public boolean facingRight, facingDown;
 	private float tileScale;
 	
-	public Player(Vector2f position, float tileScale) {
+	public Player(Rectangle position, float tileScale) {
 		super(position);
 		
 		this.velocity = new Vector2f(64, 0);
-		this.speed = 2;
+		this.speed = 3;
 		this.walkDown = new Animation(false);
 		this.walkUp = new Animation(false);
 		this.tileScale = tileScale;
+		this.facingRight = true;
+		this.facingDown = true;
 		
 		try {
 			SpriteSheet ss = new SpriteSheet("res/player_walk.png", 16, 16);
@@ -58,23 +62,27 @@ public class Player extends Entity {
 		if(velocity.getY() > 0) facingDown = true;
 		else if(velocity.getY() < 0) facingDown = false;
 		
-		position.x += velocity.x * (delta / 1000f);
-		position.y += velocity.y * (delta / 1000f);
+		position.setX(position.getX() + velocity.x * (delta / 1000f));
+		position.setY(position.getY() + velocity.y * (delta / 1000f));
 	}
 	
 	@Override
 	public void render(Vector2f camera) {
+		Image sprite;
+		
 		if(facingDown) {
 			if(facingRight)
-				walkDown.draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
+				sprite = walkDown.getCurrentFrame();
 			else
-				walkDown.getCurrentFrame().getFlippedCopy(true, false).draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
+				sprite = walkDown.getCurrentFrame().getFlippedCopy(true, false);
 		} else {
 			if(facingRight)
-				walkUp.draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
+				sprite = walkUp.getCurrentFrame();
 			else
-				walkUp.getCurrentFrame().getFlippedCopy(true, false).draw((position.x - camera.x) * tileScale, (position.y - camera.y) * tileScale);
+				sprite = walkUp.getCurrentFrame().getFlippedCopy(true, false);
 		}
+		
+		sprite.draw((position.getX() - camera.x) * tileScale - sprite.getWidth()/2, (position.getY() - camera.y) * tileScale - sprite.getHeight());
 	}
 
 }

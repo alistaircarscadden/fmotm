@@ -54,8 +54,7 @@ public class MainMenu extends BasicGameState {
 			MenuButton exitButton = new MenuButton(sbg, exitImageUp, exitImageDown, gc.getWidth() / 2 - exitImageUp.getWidth() / 2, 20 + playImageUp.getHeight() + gc.getHeight() / 2 - exitImageUp.getHeight() / 2, exitImageUp.getWidth(), exitImageUp.getHeight()) {
 				@Override
 				public void used() {
-		    		//System.exit(0);
-					sbg.enterState(Application.TILEFEELTEST);
+		    		System.exit(0);
 		    	}
 			};
 			

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
@@ -17,10 +18,12 @@ public class TileFeel {
 	private Map<Long, Image> parts;
 	private Map<Long, Image> tiles;
 	
+	private Random random;
+	
 	private long largestKey;
 	private float tileScale;
 	private final int tilePixelSize = 8;
-	private int numTiles;
+	public int numInits;
 	
 	// Part identifiers
 	private final long floorVA        = 1L;
@@ -56,14 +59,14 @@ public class TileFeel {
 	private final long wallELVA       = 1073741824L;
 	private final long wallELVB       = 2147483648L;
 	private final long wallBottomER   = 4294967296L;
-	private final long wallbottomEL   = 8589934592L;
-	private final long wallBottomFixR = 17179869184L;
-	private final long wallBottomFixL = 34359738368L;
+	private final long wallBottomEL   = 8589934592L;
 	// Missing values of 2^n
 	private final long dropVA         = 1099511627776L;
 	private final long dropVB         = 2199023255552L;
 	private final long dropVC         = 4398046511104L;
 	private final long dropVD         = 8796093022208L;
+	private final long dropER         = 17592186044416L;
+	private final long dropEL         = 35184372088832L;
 	
 	/* Constructor initializes the parts used to create tile images. Tiles
 	 * must be individually added externally by calling the initTile function
@@ -73,8 +76,9 @@ public class TileFeel {
 	public TileFeel(String ref, float tileScale) {
 		this.parts = new HashMap<Long, Image>();
 		this.tiles = new HashMap<Long, Image>();
+		random = new Random();
 		this.tileScale = tileScale;
-		this.numTiles = 0;
+		this.numInits = 0;
 		
 		try {
 			Image blank = new Image(tilePixelSize, tilePixelSize);
@@ -103,6 +107,8 @@ public class TileFeel {
 	 */
 	public void initTile(long id) {
 		if(tiles.get(id) != null) return;
+		
+		numInits++;
 
 		List<Image> includedParts = new ArrayList<Image>();
 		long id_cpy = id;
@@ -123,7 +129,6 @@ public class TileFeel {
 		finalImage.setFilter(Image.FILTER_NEAREST);
 		finalImage = finalImage.getScaledCopy(tileScale / tilePixelSize);
 		tiles.put(id, finalImage);
-		System.out.printf("%d inits.\n", ++numTiles);
 	}
 	
 	/* Given an ImageBuffer to and an Image from it adds the pixels from from to to.
@@ -154,7 +159,7 @@ public class TileFeel {
 			return new long[0][0];
 		
 		long[][] tileStyles;
-		tileStyles = new long[tiles.length][tiles[0]length];
+		tileStyles = new long[tiles.length][tiles[0].length];
 		
 		for(int x = 0; x < tiles.length; x++) {
 			for(int y = 0; y < tiles[0].length; y++) {
@@ -177,16 +182,13 @@ public class TileFeel {
 				initTile(tileStyles[x][y]);
 			}
 		}
-		
-		return tileStyles;
 	}
 	
 	private long generateTileStyle(final char[][] tiles, int x, int y) {
-		Random random = new Random(System.currentTimeMillis());
 		float r;
 		long tileStyle = 0;
 				
-		if(getTile(tiles, x, y) == 'F') {
+		if(getTileChar(tiles, x, y) == 'F') {
 			boolean topedg = false;
 			boolean rigedg = false;
 			boolean botedg = false;
@@ -199,7 +201,7 @@ public class TileFeel {
 			else tileStyle += floorVD;
 			
 			// top edge?
-			if(getTile(tiles, x, y - 1) == ' ') {
+			if(getTileChar(tiles, x, y - 1) == ' ') {
 				topedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += floorETVA;
@@ -207,7 +209,7 @@ public class TileFeel {
 			}
 			
 			// right edge?
-			if(getTile(tiles, x + 1, y) == ' ') {
+			if(getTileChar(tiles, x + 1, y) == ' ') {
 				rigedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += floorERVA;
@@ -215,7 +217,7 @@ public class TileFeel {
 			}
 			
 			// bottom edge?
-			if(getTile(tiles, x, y + 1) == ' ') {
+			if(getTileChar(tiles, x, y + 1) == ' ') {
 				botedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += floorEBVA;
@@ -223,7 +225,7 @@ public class TileFeel {
 			}
 			
 			// left edge?
-			if(getTile(tiles, x - 1, y) == ' ') {
+			if(getTileChar(tiles, x - 1, y) == ' ') {
 				lefedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += floorELVA;
@@ -231,26 +233,26 @@ public class TileFeel {
 			}
 			
 			// top right corner
-			if(getTile(tiles, x + 1, y - 1) == ' ' && !(topedg || rigedg)) {
+			if(!(topedg || rigedg) && getTileChar(tiles, x + 1, y - 1) == ' ' && !(getTileChar(tiles, x, y - 1) == 'W' && getTileChar(tiles, x + 1, y) == 'W')) {
 				tileStyle += floorCTR;
 			}
 			
 			// bottom right corner
-			if(getTile(tiles, x + 1, y + 1) == ' ' && !(rigedg || botedg)) {
+			if(!(rigedg || botedg) && getTileChar(tiles, x + 1, y + 1) == ' ' && !(getTileChar(tiles, x, y + 1) == 'W' && getTileChar(tiles, x + 1, y) == 'W')) {
 				tileStyle += floorCBR;
 			}
 			
 			// bottom left corner
-			if(getTile(tiles, x - 1, y + 1) == ' ' && !(botedg || lefedg)) {
+			if(!(botedg || lefedg) && getTileChar(tiles, x - 1, y + 1) == ' ' && !(getTileChar(tiles, x, y + 1) == 'W' && getTileChar(tiles, x - 1, y) == 'W')) {
 				tileStyle += floorCBL;
 			}
 			
 			// top left corner
-			if(getTile(tiles, x - 1, y - 1) == ' ' && !(lefedg || topedg)) {
+			if(!(lefedg || topedg) && getTileChar(tiles, x - 1, y - 1) == ' ' && !(getTileChar(tiles, x, y - 1) == 'W' && getTileChar(tiles, x - 1, y) == 'W')) {
 				tileStyle += floorCTL;
 			}
 		}
-		if(getTile(tiles, x, y) == 'W') {
+		if(getTileChar(tiles, x, y) == 'W') {
 			boolean topedg = false;
 			boolean rigedg = false;
 			boolean botedg = false;
@@ -263,7 +265,7 @@ public class TileFeel {
 			else tileStyle += wallVD;
 			
 			// top edge?
-			if(getTile(tiles, x, y - 1) != 'W') {
+			if(getTileChar(tiles, x, y - 1) != 'W') {
 				topedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += wallETVA;
@@ -271,7 +273,7 @@ public class TileFeel {
 			}
 			
 			// right edge?
-			if(getTile(tiles, x + 1, y) != 'W') {
+			if(getTileChar(tiles, x + 1, y) != 'W') {
 				rigedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += wallERVA;
@@ -279,7 +281,7 @@ public class TileFeel {
 			}
 			
 			// bottom edge?
-			if(getTile(tiles, x, y + 1) != 'W') {
+			if(getTileChar(tiles, x, y + 1) != 'W') {
 				botedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += wallEBVA;
@@ -287,7 +289,7 @@ public class TileFeel {
 			}
 			
 			// left edge?
-			if(getTile(tiles, x - 1, y) != 'W') {
+			if(getTileChar(tiles, x - 1, y) != 'W') {
 				lefedg = true;
 				r = random.nextFloat();
 				if (r > 0.5) tileStyle += wallELVA;
@@ -295,22 +297,22 @@ public class TileFeel {
 			}
 			
 			// top right corner
-			if(getTile(tiles, x + 1, y - 1) != 'W' && !(topedg || rigedg)) {
+			if(getTileChar(tiles, x + 1, y - 1) != 'W' && !(topedg || rigedg)) {
 				tileStyle += wallCTR;
 			}
 			
 			// bottom right corner
-			if(getTile(tiles, x + 1, y + 1) != 'W' && !(rigedg || botedg)) {
+			if(getTileChar(tiles, x + 1, y + 1) != 'W' && !(rigedg || botedg)) {
 				tileStyle += wallCBR;
 			}
 			
 			// bottom left corner
-			if(getTile(tiles, x - 1, y + 1) != 'W' && !(botedg || lefedg)) {
+			if(getTileChar(tiles, x - 1, y + 1) != 'W' && !(botedg || lefedg)) {
 				tileStyle += wallCBL;
 			}
 			
 			// top left corner
-			if(getTile(tiles, x - 1, y - 1) != 'W' && !(lefedg || topedg)) {
+			if(getTileChar(tiles, x - 1, y - 1) != 'W' && !(lefedg || topedg)) {
 				tileStyle += wallCTL;
 			}
 			
@@ -322,24 +324,22 @@ public class TileFeel {
 			if(botedg && lefedg) {
 				tileStyle += wallBottomEL;
 			}
-			
-			// wall bottom neighboring edge fixes
-			if(!botedg) {
-				if(!rigedg && getTile(tiles, x + 1, y + 1) != 'W') {
-					tileStyle += wallBottomFixR;
-				}
-			
-				if(!lefedg && getTile(tiles, x - 1, y + 1) != 'W') {
-					tileStyle += wallBottomFixL;
-				}
-			}
 		}
-		if(getTile(tiles, x, y) == ' ' && getTile(tiles, x, y - 1) != ' ') {
+		if(getTileChar(tiles, x, y) == ' ' && getTileChar(tiles, x, y - 1) != ' ') {
 			r = random.nextFloat();
 			if (r > 0.75) tileStyle += dropVA;
 			else if (r > 0.5) tileStyle += dropVB;
 			else if (r > 0.25) tileStyle += dropVC;
 			else tileStyle += dropVD;
+			
+			// drop right edge?
+			if(!(getTileChar(tiles, x + 1, y) == ' ' && getTileChar(tiles, x + 1, y - 1) != ' ')) {
+				tileStyle += dropER;
+			}
+			// drop left edge?
+			if(!(getTileChar(tiles, x - 1, y) == ' ' && getTileChar(tiles, x - 1, y - 1) != ' ')) {
+				tileStyle += dropEL;
+			}
 		}
 		
 		return tileStyle;
