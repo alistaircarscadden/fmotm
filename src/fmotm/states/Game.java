@@ -22,8 +22,8 @@ public class Game extends BasicGameState {
 		super();
 		this.stateID = ID;
 		keys = new BitSet(256);
-		world = new World();
-		world.generateRandom(300, 1000);
+		world = new World(keys);
+		world.generateRandom(10, 10);
 		world.setTileFeel("res/lf/lf_desert.png");
 	}
 
@@ -41,27 +41,6 @@ public class Game extends BasicGameState {
 	// update-method with all the magic happening in it
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
-		float x = 0;
-		float y = 0;
-
-		if(keys.get(Input.KEY_W)) y -= 1;
-		if(keys.get(Input.KEY_A)) x -= 1;
-		if(keys.get(Input.KEY_S)) y += 1;
-		if(keys.get(Input.KEY_D)) x += 1;
-
-		if(x != 0 && y != 0) {
-			x *= 0.707;
-			y *= 0.707;
-		}
-		
-		if(keys.get(Input.KEY_LSHIFT)) {
-			x *= 0.3;
-			y *= 0.3;
-		}
-
-		world.player.velocity.x = x * world.player.speed;
-		world.player.velocity.y = y * world.player.speed;
-		
 		world.player.update(delta);
 	}
 

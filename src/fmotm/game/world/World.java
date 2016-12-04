@@ -1,11 +1,11 @@
 package fmotm.game.world;
 
+import java.util.BitSet;
 import java.util.Random;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
@@ -20,15 +20,18 @@ public class World {
 	public Player player;
 	private Vector2f camera; // Camera refers to position of display within world coordinates
 	private EntityManager entityManager;
+	private BitSet input;
 	
 	// World Properties
 	public final float tileScale = 64f;
 	
-	public World() {
-		entityManager = new EntityManager(new Rectangle(-2f, -2f, 20f, 20f));
-		player = new Player(new Rectangle(0f, 0f, 0.5f, 0.5f), tileScale);
-		entityManager.addEntity(player);
-		camera = new Vector2f();
+	public World(BitSet input) {
+		this.input = input;
+		this.entityManager = new EntityManager(new Rectangle(0f, 0f, 100f, 100f));
+		this.player = new Player(this, new Rectangle(0f, 0f, .7f, .7f), tileScale);
+		player.setInput(input);
+		this.entityManager.addEntity(player);
+		this.camera = new Vector2f();
 	}
 	
 	public void update(int delta) {
@@ -48,17 +51,18 @@ public class World {
 		drawTiles((int) camera.x, (int) camera.y, (int) (gc.getWidth() / tileScale), (int) (gc.getHeight() / tileScale));
 		
 		player.render(camera);
+		g.setColor(new Color(255, 0, 0));
 	}
 	
-	public void drawTile(Vector2f camera, Image img, int x, int y) {
-		img.draw((x - camera.x) * tileScale, (y - camera.y) * tileScale);
+	public void drawTile(Vector2f camera, int x, int y) {
+		tileFeel.getTile(getTileStyle(x, y)).draw((x - camera.x) * tileScale, (y - camera.y) * tileScale);
 	}
 	
 	public void drawTiles(int x, int y, int width, int height) {
 		// Initial loop draws base for all tiles
 		for(int x_c = x; x_c <= x + width; x_c++) {
 			for(int y_c = y; y_c <= y + height; y_c++) {
-				drawTile(camera, tileFeel.getTile(getTileStyle(x_c, y_c)), x_c, y_c);
+				drawTile(camera, x_c, y_c);
 			}
 		}
 	}
@@ -76,7 +80,7 @@ public class World {
 				
 				if(f > 0.9) {
 					tiles[x][y] = ' ';
-				} else if(f > 0.75) {
+				} else if(f > 0.7) {
 					tiles[x][y] = 'W';
 				} else {
 					tiles[x][y] = 'F';
@@ -101,5 +105,13 @@ public class World {
 		}
 		
 		return 0;
+	}
+	
+	public boolean tileIsUnpassable(int x, int y) {
+		if(tiles.length > 0 && tiles[0].length > 0 && x >= 0 && x < tiles.length && y >= 0 && y < tiles[0].length) {
+			if(tiles[x][y] == 'W') return true;
+		}
+		
+		return false;
 	}
 }
