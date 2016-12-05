@@ -5,50 +5,25 @@ import java.util.BitSet;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.geom.Vector2f;
 
+import fmotm.game.world.Camera;
 import fmotm.game.world.World;
 
 public class Player extends Entity {
 	public Animation walkDown;
 	public Animation walkUp;
-	public float speed;
 	public boolean facingRight, facingDown;
-	private float tileScale;
 	private BitSet input;
 	private long lastTeleport;
 	
-	public Player(World world, Rectangle position, float tileScale) {
-		super(world, position);
-		
-		this.velocity = new Vector2f(64, 0);
-		this.speed = 5;
-		this.walkDown = new Animation(false);
-		this.walkUp = new Animation(false);
-		this.tileScale = tileScale;
+	public Player(World world, int typeID, Rectangle position) {
+		super(world, typeID, position);
+		this.dispSize = 1f;
+		this.moveSpeed = 5;
 		this.facingRight = true;
 		this.facingDown = true;
 		this.lastTeleport = 0;
-		
-		try {
-			SpriteSheet ss = new SpriteSheet("res/player_walk.png", 16, 16);
-			final int frameLength = 100;
-
-			float playerScale = tileScale / (ss.getWidth() / ss.getHorizontalCount());
-			
-			walkDown.addFrame(ss.getSprite(0, 0).getScaledCopy(playerScale), frameLength);
-			walkDown.addFrame(ss.getSprite(1, 0).getScaledCopy(playerScale), frameLength);
-			walkDown.addFrame(ss.getSprite(2, 0).getScaledCopy(playerScale), frameLength);
-			
-			walkUp.addFrame(ss.getSprite(0, 1).getScaledCopy(playerScale), frameLength);
-			walkUp.addFrame(ss.getSprite(1, 1).getScaledCopy(playerScale), frameLength);
-			walkUp.addFrame(ss.getSprite(2, 1).getScaledCopy(playerScale), frameLength);
-		} catch (SlickException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
@@ -75,8 +50,8 @@ public class Player extends Entity {
 			teleport();
 		}
 		
-		velocity.x = x * speed;
-		velocity.y = y * speed;
+		velocity.x = x * moveSpeed;
+		velocity.y = y * moveSpeed;
 		
 		move(delta);
 		
@@ -99,7 +74,9 @@ public class Player extends Entity {
 	}
 	
 	@Override
-	public void render(Vector2f camera) {
+	public void render(Camera camera) {
+		if(walkUp == null || walkDown == null) return;
+		
 		Image sprite;
 		
 		if(facingDown) {
@@ -114,7 +91,7 @@ public class Player extends Entity {
 				sprite = walkUp.getCurrentFrame().getFlippedCopy(true, false);
 		}
 		
-		sprite.draw((position.getX() + (position.getWidth() / 2) - 0.5f - camera.getX()) * tileScale, (position.getY() - (1 - position.getHeight()) - camera.getY()) * tileScale);
+		sprite.draw((position.getX() + (position.getWidth() / 2) - 0.5f - camera.getX()) * camera.getTileScale(), (position.getY() - (1 - position.getHeight()) - camera.getY()) * camera.getTileScale());
 	}
 	
 	private void teleport() {
@@ -137,4 +114,19 @@ public class Player extends Entity {
 		this.input = input;
 	}
 
+	@Override
+	protected void initAnimations() {
+		this.walkDown = new Animation(false);
+		this.walkUp = new Animation(false);
+		
+		int frameLength = 100;
+		
+		walkDown.addFrame(sprites[0], frameLength);
+		walkDown.addFrame(sprites[1], frameLength);
+		walkDown.addFrame(sprites[2], frameLength);
+		
+		walkUp.addFrame(sprites[3], frameLength);
+		walkUp.addFrame(sprites[4], frameLength);
+		walkUp.addFrame(sprites[5], frameLength);
+	}
 }

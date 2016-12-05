@@ -4,7 +4,6 @@ import java.util.BitSet;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -23,8 +22,7 @@ public class Game extends BasicGameState {
 		this.stateID = ID;
 		keys = new BitSet(256);
 		world = new World(keys);
-		world.generateRandom(10, 10);
-		world.setTileFeel("res/lf/lf_desert.png");
+		world.loadWorld("res/lev/lev1");
 	}
 
 	// init-method for initializing all resources
@@ -38,10 +36,10 @@ public class Game extends BasicGameState {
 		world.drawWorld(gc, sbg, g);
 	}
 
-	// update-method with all the magic happening in it
+	// update-method with allsd the magic happening in it
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
-		world.player.update(delta);
+		world.update(delta);
 	}
 
 	// Returning 'ID' from class 'MainMenu'
